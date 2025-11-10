@@ -177,13 +177,8 @@ void QAdwaitaDecorations::initConfiguration()
             QLatin1String("org.freedesktop.portal.Settings"), QLatin1String("SettingChanged"), this,
             SLOT(settingChanged(QString, QString, QDBusVariant)));
 
-    // 首先尝试从配置文件加载颜色
-    loadColorsFromConfig();
-
-    // 如果配置文件中没有颜色或配置文件不存在，则使用默认颜色
-    if (m_colors.isEmpty()) {
-        updateColors(false);
-    }
+    // 初始化颜色
+    updateColors(false);
 
     updateIcons();
 }
@@ -222,13 +217,15 @@ void QAdwaitaDecorations::loadColorsFromConfig()
             m_colors[Background] = QColor(settings.value("darkBackground").toString());
         }
         if (settings.contains("darkBackgroundInactive")) {
-            m_colors[BackgroundInactive] = QColor(settings.value("darkBackgroundInactive").toString());
+            m_colors[BackgroundInactive] =
+                    QColor(settings.value("darkBackgroundInactive").toString());
         }
         if (settings.contains("darkForeground")) {
             m_colors[Foreground] = QColor(settings.value("darkForeground").toString());
         }
         if (settings.contains("darkForegroundInactive")) {
-            m_colors[ForegroundInactive] = QColor(settings.value("darkForegroundInactive").toString());
+            m_colors[ForegroundInactive] =
+                    QColor(settings.value("darkForegroundInactive").toString());
         }
         if (settings.contains("darkBorder")) {
             m_colors[Border] = QColor(settings.value("darkBorder").toString());
@@ -240,13 +237,16 @@ void QAdwaitaDecorations::loadColorsFromConfig()
             m_colors[ButtonBackground] = QColor(settings.value("darkButtonBackground").toString());
         }
         if (settings.contains("darkButtonBackgroundInactive")) {
-            m_colors[ButtonBackgroundInactive] = QColor(settings.value("darkButtonBackgroundInactive").toString());
+            m_colors[ButtonBackgroundInactive] =
+                    QColor(settings.value("darkButtonBackgroundInactive").toString());
         }
         if (settings.contains("darkHoveredButtonBackground")) {
-            m_colors[HoveredButtonBackground] = QColor(settings.value("darkHoveredButtonBackground").toString());
+            m_colors[HoveredButtonBackground] =
+                    QColor(settings.value("darkHoveredButtonBackground").toString());
         }
         if (settings.contains("darkPressedButtonBackground")) {
-            m_colors[PressedButtonBackground] = QColor(settings.value("darkPressedButtonBackground").toString());
+            m_colors[PressedButtonBackground] =
+                    QColor(settings.value("darkPressedButtonBackground").toString());
         }
     } else {
         // 读取浅色主题颜色
@@ -272,22 +272,25 @@ void QAdwaitaDecorations::loadColorsFromConfig()
             m_colors[ButtonBackground] = QColor(settings.value("buttonBackground").toString());
         }
         if (settings.contains("buttonBackgroundInactive")) {
-            m_colors[ButtonBackgroundInactive] = QColor(settings.value("buttonBackgroundInactive").toString());
+            m_colors[ButtonBackgroundInactive] =
+                    QColor(settings.value("buttonBackgroundInactive").toString());
         }
         if (settings.contains("hoveredButtonBackground")) {
-            m_colors[HoveredButtonBackground] = QColor(settings.value("hoveredButtonBackground").toString());
+            m_colors[HoveredButtonBackground] =
+                    QColor(settings.value("hoveredButtonBackground").toString());
         }
         if (settings.contains("pressedButtonBackground")) {
-            m_colors[PressedButtonBackground] = QColor(settings.value("pressedButtonBackground").toString());
+            m_colors[PressedButtonBackground] =
+                    QColor(settings.value("pressedButtonBackground").toString());
         }
     }
 
     settings.endGroup();
 
-    // 如果配置文件中没有指定颜色，则使用默认值
+    // 如果配置文件中没有指定颜色，则不设置任何颜色
+    // 让调用者决定是否使用默认颜色
     if (m_colors.isEmpty()) {
-        qCDebug(QAdwaitaDecorationsLog) << "No colors found in config file, using default colors";
-        updateColors(useDarkColors);
+        qCDebug(QAdwaitaDecorationsLog) << "No colors found in config file";
     }
 }
 
@@ -296,16 +299,25 @@ void QAdwaitaDecorations::updateColors(bool useDarkColors)
     qCDebug(QAdwaitaDecorationsLog)
             << "Changing color scheme to " << (useDarkColors ? "dark" : "light");
 
-    m_colors = { { Background, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
-                 { BackgroundInactive, useDarkColors ? QColor(0x222226) : QColor(0xfafafb) },
-                 { Foreground, useDarkColors ? QColor(0xffffff) : QColor(0x333338) },
-                 { ForegroundInactive, useDarkColors ? QColor(0x919193) : QColor(0x969699) },
-                 { Border, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
-                 { BorderInactive, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
-                 { ButtonBackground, useDarkColors ? QColor(0x434347) : QColor(0xebebeb) },
-                 { ButtonBackgroundInactive, useDarkColors ? QColor(0x2d2d31) : QColor(0xf0f0f1) },
-                 { HoveredButtonBackground, useDarkColors ? QColor(0x4d4d51) : QColor(0xe0e0e1) },
-                 { PressedButtonBackground, useDarkColors ? QColor(0x6c6c6f) : QColor(0xc2c2c3) } };
+    // 首先尝试从配置文件加载颜色
+    loadColorsFromConfig();
+
+    // 如果配置文件中没有颜色或配置文件不存在，则使用默认颜色
+    if (m_colors.isEmpty()) {
+        m_colors = {
+            { Background, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
+            { BackgroundInactive, useDarkColors ? QColor(0x222226) : QColor(0xfafafb) },
+            { Foreground, useDarkColors ? QColor(0xffffff) : QColor(0x333338) },
+            { ForegroundInactive, useDarkColors ? QColor(0x919193) : QColor(0x969699) },
+            { Border, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
+            { BorderInactive, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
+            { ButtonBackground, useDarkColors ? QColor(0x434347) : QColor(0xebebeb) },
+            { ButtonBackgroundInactive, useDarkColors ? QColor(0x2d2d31) : QColor(0xf0f0f1) },
+            { HoveredButtonBackground, useDarkColors ? QColor(0x4d4d51) : QColor(0xe0e0e1) },
+            { PressedButtonBackground, useDarkColors ? QColor(0x6c6c6f) : QColor(0xc2c2c3) }
+        };
+    }
+
     forceRepaint();
 }
 
@@ -405,13 +417,7 @@ void QAdwaitaDecorations::settingChanged(const QString &group, const QString &ke
     } else if (group == QLatin1String("org.freedesktop.appearance")
                && key == QLatin1String("color-scheme")) {
         const uint colorScheme = value.variant().toUInt();
-        // 首先尝试从配置文件加载颜色
-        loadColorsFromConfig();
-
-        // 如果配置文件中没有颜色或配置文件不存在，则使用默认颜色
-        if (m_colors.isEmpty()) {
-            updateColors(colorScheme == 1); // 1 == Prefer Dark
-        }
+        updateColors(colorScheme == 1); // 1 == Prefer Dark
     }
 }
 
