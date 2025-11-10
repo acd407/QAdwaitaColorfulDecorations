@@ -79,6 +79,7 @@ private Q_SLOTS:
 
 private:
     void initConfiguration();
+    void loadColorsFromConfig();
     void updateColors(bool useDarkColors);
     void updateIcons();
     void updateTitlebarLayout(const QString &layout);

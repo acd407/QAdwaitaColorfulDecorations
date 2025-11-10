@@ -9,6 +9,8 @@ option(USE_QT6 "Use Qt6 instead of Qt5" OFF)
 
 set(CMAKE_AUTOMOC ON)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 if (USE_QT6)
     set(QT_MIN_VERSION "6.5.0")
     set(CMAKE_CXX_STANDARD 17)

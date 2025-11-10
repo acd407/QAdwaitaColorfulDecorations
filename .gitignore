@@ -1,0 +1,162 @@
+# Build directories
+build/
+build-*/
+cmake-build-*/
+out/
+
+# CMake generated files
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+*.cmake
+compile_commands.json
+
+# Qt specific files
+*.pro.user*
+*.qbs.user*
+*.moc
+*.moc.cpp
+*.qrc.cpp
+*_autogen/
+ui_*.h
+qrc_*.cpp
+*.qmlc
+*.jsc
+
+# Qt Creator
+*.pro.user*
+*.qbs.user*
+*.qmlproject.user*
+*.autosave
+
+# Qt Linguist
+*.qm
+*.ts
+
+# Qt translations
+*.ts
+*.qm
+
+# Qt deployment
+*.app
+*.dSYM
+*.exe
+*.dll
+*.so
+*.dylib
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.clangd/
+.cache/
+
+# Compiled Object files
+*.o
+*.obj
+*.lo
+*.a
+*.la
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Log files
+*.log
+
+# Editor backups and temporary files
+*~
+.#*
+\#*#
+.*.swp
+.*.swo
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Debug files
+*.debug
+*.debug.*
+
+# Coverage reports
+*.gcov
+*.gcda
+*.gcno
+coverage/
+lcov/
+
+# Package files
+*.tar.gz
+*.zip
+*.7z
+*.rar
+*.deb
+*.rpm
+*.dmg
+
+# Doxygen documentation
+doxygen/
+html/
+latex/
+
+# Valgrind
+*.valgrind
+
+# GDB
+.gdb_history
+
+# Clang
+*.pch
+*.ptx
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pytest
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# Backup files
+*.bak
+*.backup
+*.old
+*.orig
+*.rej
+*~
+
+# Temporary files
+*.tmp
+*.temp
+.marscode

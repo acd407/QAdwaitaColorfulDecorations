@@ -1,0 +1,45 @@
+# QAdwaitaDecorations 配置文件
+# 此文件应放置在 $XDG_CONFIG_HOME/QAdwaitaColorfulDecorations.conf
+# 通常 $XDG_CONFIG_HOME 是 ~/.config/
+
+[Colors]
+# 是否使用深色主题 (true/false)
+useDarkColors=false
+
+# 浅色主题颜色配置
+# 背景色
+background=#dcdcdc
+backgroundInactive=#d0d0d0
+
+# 前景色（文字颜色）
+foreground=#050505
+foregroundInactive=#323232
+
+# 边框色
+border=#dcdcdc
+borderInactive=#dcdcdc
+
+# 按钮背景色
+buttonBackground=#cfcfd0
+buttonBackgroundInactive=#e0e0e0
+hoveredButtonBackground=#c0c0c0
+pressedButtonBackground=#b0b0b0
+
+# 深色主题颜色配置
+# 背景色
+darkBackground=#2e2e32
+darkBackgroundInactive=#222226
+
+# 前景色（文字颜色）
+darkForeground=#ffffff
+darkForegroundInactive=#919193
+
+# 边框色
+darkBorder=#2e2e32
+darkBorderInactive=#2e2e32
+
+# 按钮背景色
+darkButtonBackground=#434347
+darkButtonBackgroundInactive=#2d2d31
+darkHoveredButtonBackground=#4d4d51
+darkPressedButtonBackground=#6c6c6f

@@ -25,6 +25,9 @@
 
 #include <QtCore/QLoggingCategory>
 #include <QScopeGuard>
+#include <QtCore/QStandardPaths>
+#include <QtCore/QSettings>
+#include <QtCore/QDir>
 
 #include <QtGui/QColor>
 #include <QtGui/QPainter>
@@ -174,8 +177,118 @@ void QAdwaitaDecorations::initConfiguration()
             QLatin1String("org.freedesktop.portal.Settings"), QLatin1String("SettingChanged"), this,
             SLOT(settingChanged(QString, QString, QDBusVariant)));
 
-    updateColors(false);
+    // 首先尝试从配置文件加载颜色
+    loadColorsFromConfig();
+
+    // 如果配置文件中没有颜色或配置文件不存在，则使用默认颜色
+    if (m_colors.isEmpty()) {
+        updateColors(false);
+    }
+
     updateIcons();
+}
+
+void QAdwaitaDecorations::loadColorsFromConfig()
+{
+    // 获取配置文件路径
+    QString configPath = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation);
+    if (configPath.isEmpty()) {
+        qCWarning(QAdwaitaDecorationsLog) << "Failed to get config directory";
+        return;
+    }
+
+    QString configFile = configPath + QDir::separator() + "QAdwaitaColorfulDecorations.conf";
+    QSettings settings(configFile, QSettings::IniFormat);
+
+    // 检查配置文件是否存在
+    if (!QFile::exists(configFile)) {
+        qCDebug(QAdwaitaDecorationsLog)
+                << "Config file not found, using default colors:" << configFile;
+        return;
+    }
+
+    qCDebug(QAdwaitaDecorationsLog) << "Loading colors from config file:" << configFile;
+
+    // 读取颜色配置
+    settings.beginGroup("Colors");
+
+    // 读取是否使用深色主题
+    bool useDarkColors = settings.value("useDarkColors", false).toBool();
+
+    // 根据主题选择相应的颜色变量
+    if (useDarkColors) {
+        // 读取深色主题颜色
+        if (settings.contains("darkBackground")) {
+            m_colors[Background] = QColor(settings.value("darkBackground").toString());
+        }
+        if (settings.contains("darkBackgroundInactive")) {
+            m_colors[BackgroundInactive] = QColor(settings.value("darkBackgroundInactive").toString());
+        }
+        if (settings.contains("darkForeground")) {
+            m_colors[Foreground] = QColor(settings.value("darkForeground").toString());
+        }
+        if (settings.contains("darkForegroundInactive")) {
+            m_colors[ForegroundInactive] = QColor(settings.value("darkForegroundInactive").toString());
+        }
+        if (settings.contains("darkBorder")) {
+            m_colors[Border] = QColor(settings.value("darkBorder").toString());
+        }
+        if (settings.contains("darkBorderInactive")) {
+            m_colors[BorderInactive] = QColor(settings.value("darkBorderInactive").toString());
+        }
+        if (settings.contains("darkButtonBackground")) {
+            m_colors[ButtonBackground] = QColor(settings.value("darkButtonBackground").toString());
+        }
+        if (settings.contains("darkButtonBackgroundInactive")) {
+            m_colors[ButtonBackgroundInactive] = QColor(settings.value("darkButtonBackgroundInactive").toString());
+        }
+        if (settings.contains("darkHoveredButtonBackground")) {
+            m_colors[HoveredButtonBackground] = QColor(settings.value("darkHoveredButtonBackground").toString());
+        }
+        if (settings.contains("darkPressedButtonBackground")) {
+            m_colors[PressedButtonBackground] = QColor(settings.value("darkPressedButtonBackground").toString());
+        }
+    } else {
+        // 读取浅色主题颜色
+        if (settings.contains("background")) {
+            m_colors[Background] = QColor(settings.value("background").toString());
+        }
+        if (settings.contains("backgroundInactive")) {
+            m_colors[BackgroundInactive] = QColor(settings.value("backgroundInactive").toString());
+        }
+        if (settings.contains("foreground")) {
+            m_colors[Foreground] = QColor(settings.value("foreground").toString());
+        }
+        if (settings.contains("foregroundInactive")) {
+            m_colors[ForegroundInactive] = QColor(settings.value("foregroundInactive").toString());
+        }
+        if (settings.contains("border")) {
+            m_colors[Border] = QColor(settings.value("border").toString());
+        }
+        if (settings.contains("borderInactive")) {
+            m_colors[BorderInactive] = QColor(settings.value("borderInactive").toString());
+        }
+        if (settings.contains("buttonBackground")) {
+            m_colors[ButtonBackground] = QColor(settings.value("buttonBackground").toString());
+        }
+        if (settings.contains("buttonBackgroundInactive")) {
+            m_colors[ButtonBackgroundInactive] = QColor(settings.value("buttonBackgroundInactive").toString());
+        }
+        if (settings.contains("hoveredButtonBackground")) {
+            m_colors[HoveredButtonBackground] = QColor(settings.value("hoveredButtonBackground").toString());
+        }
+        if (settings.contains("pressedButtonBackground")) {
+            m_colors[PressedButtonBackground] = QColor(settings.value("pressedButtonBackground").toString());
+        }
+    }
+
+    settings.endGroup();
+
+    // 如果配置文件中没有指定颜色，则使用默认值
+    if (m_colors.isEmpty()) {
+        qCDebug(QAdwaitaDecorationsLog) << "No colors found in config file, using default colors";
+        updateColors(useDarkColors);
+    }
 }
 
 void QAdwaitaDecorations::updateColors(bool useDarkColors)
@@ -292,7 +405,13 @@ void QAdwaitaDecorations::settingChanged(const QString &group, const QString &ke
     } else if (group == QLatin1String("org.freedesktop.appearance")
                && key == QLatin1String("color-scheme")) {
         const uint colorScheme = value.variant().toUInt();
-        updateColors(colorScheme == 1); // 1 == Prefer Dark
+        // 首先尝试从配置文件加载颜色
+        loadColorsFromConfig();
+
+        // 如果配置文件中没有颜色或配置文件不存在，则使用默认颜色
+        if (m_colors.isEmpty()) {
+            updateColors(colorScheme == 1); // 1 == Prefer Dark
+        }
     }
 }
 
@@ -801,7 +920,7 @@ void QAdwaitaDecorations::processMouseTop(QWaylandInputDevice *inputDevice, cons
 #  if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
             waylandWindow()->applyCursor(inputDevice, Qt::SizeFDiagCursor);
 #  else
-            waylandWindow()->setMouseCursor(inputDevice, Qt::SizeFDiagCursor);
+            waylandWindow()->applyCursor(inputDevice, Qt::SizeFDiagCursor);
 #  endif
 #endif
             startResize(inputDevice, Qt::TopEdge | Qt::LeftEdge, b);
@@ -811,7 +930,7 @@ void QAdwaitaDecorations::processMouseTop(QWaylandInputDevice *inputDevice, cons
 #  if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
             waylandWindow()->applyCursor(inputDevice, Qt::SizeBDiagCursor);
 #  else
-            waylandWindow()->setMouseCursor(inputDevice, Qt::SizeBDiagCursor);
+            waylandWindow()->applyCursor(inputDevice, Qt::SizeBDiagCursor);
 #  endif
 #endif
             startResize(inputDevice, Qt::TopEdge | Qt::RightEdge, b);
@@ -821,7 +940,7 @@ void QAdwaitaDecorations::processMouseTop(QWaylandInputDevice *inputDevice, cons
 #  if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
             waylandWindow()->applyCursor(inputDevice, Qt::SizeVerCursor);
 #  else
-            waylandWindow()->setMouseCursor(inputDevice, Qt::SizeVerCursor);
+            waylandWindow()->applyCursor(inputDevice, Qt::SizeVerCursor);
 #  endif
 #endif
             startResize(inputDevice, Qt::TopEdge, b);
@@ -872,7 +991,7 @@ void QAdwaitaDecorations::processMouseBottom(QWaylandInputDevice *inputDevice, c
 #  if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         waylandWindow()->applyCursor(inputDevice, Qt::SizeBDiagCursor);
 #  else
-        waylandWindow()->setMouseCursor(inputDevice, Qt::SizeBDiagCursor);
+        waylandWindow()->applyCursor(inputDevice, Qt::SizeBDiagCursor);
 #  endif
 #endif
         startResize(inputDevice, Qt::BottomEdge | Qt::LeftEdge, b);
@@ -882,7 +1001,7 @@ void QAdwaitaDecorations::processMouseBottom(QWaylandInputDevice *inputDevice, c
 #  if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         waylandWindow()->applyCursor(inputDevice, Qt::SizeFDiagCursor);
 #  else
-        waylandWindow()->setMouseCursor(inputDevice, Qt::SizeFDiagCursor);
+        waylandWindow()->applyCursor(inputDevice, Qt::SizeFDiagCursor);
 #  endif
 #endif
         startResize(inputDevice, Qt::BottomEdge | Qt::RightEdge, b);
@@ -892,7 +1011,7 @@ void QAdwaitaDecorations::processMouseBottom(QWaylandInputDevice *inputDevice, c
 #  if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
         waylandWindow()->applyCursor(inputDevice, Qt::SizeVerCursor);
 #  else
-        waylandWindow()->setMouseCursor(inputDevice, Qt::SizeVerCursor);
+        waylandWindow()->applyCursor(inputDevice, Qt::SizeVerCursor);
 #  endif
 #endif
         startResize(inputDevice, Qt::BottomEdge, b);
@@ -908,7 +1027,7 @@ void QAdwaitaDecorations::processMouseLeft(QWaylandInputDevice *inputDevice, con
 #  if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
     waylandWindow()->applyCursor(inputDevice, Qt::SizeHorCursor);
 #  else
-    waylandWindow()->setMouseCursor(inputDevice, Qt::SizeHorCursor);
+    waylandWindow()->applyCursor(inputDevice, Qt::SizeHorCursor);
 #  endif
 #endif
     startResize(inputDevice, Qt::LeftEdge, b);
@@ -923,7 +1042,7 @@ void QAdwaitaDecorations::processMouseRight(QWaylandInputDevice *inputDevice, co
 #  if QT_VERSION >= QT_VERSION_CHECK(6, 10, 0)
     waylandWindow()->applyCursor(inputDevice, Qt::SizeHorCursor);
 #  else
-    waylandWindow()->setMouseCursor(inputDevice, Qt::SizeHorCursor);
+    waylandWindow()->applyCursor(inputDevice, Qt::SizeHorCursor);
 #  endif
 #endif
     startResize(inputDevice, Qt::RightEdge, b);

@@ -20,9 +20,19 @@ make && make install
 It can be used by setting the QT_WAYLAND_DECORATION environment variable:
 
 ```
-export QT_WAYLAND_DECORATION=adwaita
+export QT_WAYLAND_DECORATION=adwaita-colorful
 ```
+
+## Configuration
+You can customize the colors by creating a configuration file at `$XDG_CONFIG_HOME/QAdwaitaColorfulDecorations.conf` (usually `~/.config/QAdwaitaColorfulDecorations.conf`).
+
+An example configuration file is provided as `QAdwaitaColorfulDecorations.conf.example` in the repository. You can copy it to your config directory and modify it according to your preferences:
+
+```
+cp QAdwaitaColorfulDecorations.conf.example ~/.config/QAdwaitaColorfulDecorations.conf
+```
+
+The configuration file allows you to customize various colors such as background, foreground, border, and button colors for both active and inactive states, as well as hover and pressed states.
 
 ## License
 The code is under [LGPL 2.1](https://www.gnu.org/licenses/old-licenses/lgpl-2.1.en.html) with the "or any later version" clause.
-
