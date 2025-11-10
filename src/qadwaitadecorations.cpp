@@ -302,20 +302,65 @@ void QAdwaitaDecorations::updateColors(bool useDarkColors)
     // 首先尝试从配置文件加载颜色
     loadColorsFromConfig();
 
-    // 如果配置文件中没有颜色或配置文件不存在，则使用默认颜色
-    if (m_colors.isEmpty()) {
-        m_colors = {
-            { Background, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
-            { BackgroundInactive, useDarkColors ? QColor(0x222226) : QColor(0xfafafb) },
-            { Foreground, useDarkColors ? QColor(0xffffff) : QColor(0x333338) },
-            { ForegroundInactive, useDarkColors ? QColor(0x919193) : QColor(0x969699) },
-            { Border, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
-            { BorderInactive, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
-            { ButtonBackground, useDarkColors ? QColor(0x434347) : QColor(0xebebeb) },
-            { ButtonBackgroundInactive, useDarkColors ? QColor(0x2d2d31) : QColor(0xf0f0f1) },
-            { HoveredButtonBackground, useDarkColors ? QColor(0x4d4d51) : QColor(0xe0e0e1) },
-            { PressedButtonBackground, useDarkColors ? QColor(0x6c6c6f) : QColor(0xc2c2c3) }
-        };
+    // 设置默认颜色，只有在配置文件中没有对应颜色时才使用
+    // 这样可以确保所有颜色都有值，即使配置文件只配置了部分颜色
+    const QMap<ColorType, QColor> defaultColors = {
+        { Background, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
+        { BackgroundInactive, useDarkColors ? QColor(0x222226) : QColor(0xfafafb) },
+        { Foreground, useDarkColors ? QColor(0xffffff) : QColor(0x333338) },
+        { ForegroundInactive, useDarkColors ? QColor(0x919193) : QColor(0x969699) },
+        { Border, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
+        { BorderInactive, useDarkColors ? QColor(0x2e2e32) : QColor(0xffffff) },
+        { ButtonBackground, useDarkColors ? QColor(0x434347) : QColor(0xebebeb) },
+        { ButtonBackgroundInactive, useDarkColors ? QColor(0x2d2d31) : QColor(0xf0f0f1) },
+        { HoveredButtonBackground, useDarkColors ? QColor(0x4d4d51) : QColor(0xe0e0e1) },
+        { PressedButtonBackground, useDarkColors ? QColor(0x6c6c6f) : QColor(0xc2c2c3) }
+    };
+
+    // 确保所有颜色都有值，如果配置文件中没有某个颜色，则使用默认值
+    for (auto it = defaultColors.constBegin(); it != defaultColors.constEnd(); ++it) {
+        if (!m_colors.contains(it.key())) {
+            m_colors[it.key()] = it.value();
+        }
+    }
+
+    // 输出所有采用的颜色，用于调试
+    qCDebug(QAdwaitaDecorationsLog) << "Using colors:";
+    for (auto it = m_colors.constBegin(); it != m_colors.constEnd(); ++it) {
+        QString colorName;
+        switch (it.key()) {
+        case Background:
+            colorName = "Background";
+            break;
+        case BackgroundInactive:
+            colorName = "BackgroundInactive";
+            break;
+        case Foreground:
+            colorName = "Foreground";
+            break;
+        case ForegroundInactive:
+            colorName = "ForegroundInactive";
+            break;
+        case Border:
+            colorName = "Border";
+            break;
+        case BorderInactive:
+            colorName = "BorderInactive";
+            break;
+        case ButtonBackground:
+            colorName = "ButtonBackground";
+            break;
+        case ButtonBackgroundInactive:
+            colorName = "ButtonBackgroundInactive";
+            break;
+        case HoveredButtonBackground:
+            colorName = "HoveredButtonBackground";
+            break;
+        case PressedButtonBackground:
+            colorName = "PressedButtonBackground";
+            break;
+        }
+        qCDebug(QAdwaitaDecorationsLog) << "  " << colorName << "=" << it.value().name();
     }
 
     forceRepaint();
